@@ -1,0 +1,51 @@
+/* avatar.css — .chat-avatar (image or initials), sizes sm/md/lg. (R5.3) */
+
+.chat-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--chat-radius-full);
+  overflow: hidden;
+  font-size: var(--chat-text-sm);
+  font-weight: var(--chat-weight-medium);
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+  /* Initials variant: hue is set inline via --chat-avatar-hue (ChatUI.hueFor).
+   * hsl() is allowed here per design §2 for the deterministic initials color.
+   * The background is a fixed-lightness saturated color, so white initials keep
+   * AA contrast in both themes; white is expressed via hsl to stay within the
+   * sanctioned avatar-initials color treatment (no hard-coded hex). */
+  color: hsl(0 0% 100%);
+  background: hsl(var(--chat-avatar-hue, 220) 45% 42%);
+}
+
+/* Image variant: the <img> fills the circle; initials background is covered. */
+.chat-avatar > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- Sizes --- */
+.chat-avatar--sm {
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+}
+
+.chat-avatar--md {
+  width: 36px;
+  height: 36px;
+  font-size: var(--chat-text-sm);
+}
+
+.chat-avatar--lg {
+  width: 48px;
+  height: 48px;
+  font-size: var(--chat-text-md);
+}

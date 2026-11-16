@@ -1,0 +1,63 @@
+/* channel-list.css — .chat-channel-list nav + .chat-channel-item buttons.
+ * (R4.1, R4.4)
+ */
+
+.chat-channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--chat-space-1) var(--chat-space-2);
+}
+
+.chat-channel-item {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-space-2);
+  width: 100%;
+  padding: var(--chat-space-1) var(--chat-space-2);
+  border: 0;
+  border-radius: var(--chat-radius-md);
+  font: inherit;
+  font-size: var(--chat-text-md);
+  text-align: left;
+  cursor: pointer;
+  color: var(--chat-text-muted);
+  background: transparent;
+  transition: background-color var(--chat-duration) var(--chat-ease);
+}
+
+.chat-channel-item:hover {
+  background: var(--chat-accent-soft);
+}
+
+/* Active channel (host sets aria-current). */
+.chat-channel-item[aria-current="true"] {
+  color: var(--chat-text);
+  background: var(--chat-accent-soft);
+}
+
+.chat-channel-item__hash {
+  flex: 0 0 auto;
+  font-weight: var(--chat-weight-medium);
+  color: var(--chat-text-muted);
+}
+
+.chat-channel-item__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Unread emphasis: bold name + full-strength text color. */
+.chat-channel-item--unread,
+.chat-channel-item--unread .chat-channel-item__name {
+  color: var(--chat-text);
+  font-weight: var(--chat-weight-bold);
+}
+
+.chat-channel-item .chat-badge {
+  flex: 0 0 auto;
+  margin-left: auto;
+}

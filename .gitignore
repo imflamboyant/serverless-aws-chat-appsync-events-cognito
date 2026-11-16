@@ -1,0 +1,8 @@
+node_modules
+.DS_Store
+# CDK
+cdk.out
+.cdk.staging
+cdk-outputs.json
+# generated from the CDK outputs by scripts/write-config.mjs
+client/config.js

@@ -1,0 +1,26 @@
+/* badge.css — .chat-badge pill (count, accent) and --muted label. (R5.4) */
+
+.chat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--chat-space-2);
+  border-radius: var(--chat-radius-full);
+  font-size: 11px;
+  font-weight: var(--chat-weight-bold);
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--chat-accent-contrast);
+  background: var(--chat-accent);
+}
+
+/* Label variant: neutral, lower emphasis. */
+.chat-badge--muted {
+  font-weight: var(--chat-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--chat-text-muted);
+  background: var(--chat-surface-sunken);
+}

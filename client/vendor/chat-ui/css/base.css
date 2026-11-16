@@ -1,0 +1,50 @@
+/* base.css — scoped reset, typography defaults, focus ring, utilities.
+ *
+ * Everything is scoped to .chat-* roots so the library does not restyle the
+ * host page. Uses --chat-* tokens only (no hard-coded colors).
+ */
+
+/* Scoped box-sizing: applies to every chat root and its descendants. */
+[class^="chat-"],
+[class*=" chat-"] {
+  box-sizing: border-box;
+}
+
+/* Typography defaults for chat roots. Descendants inherit font/color/leading. */
+[class^="chat-"],
+[class*=" chat-"] {
+  font-family: var(--chat-font);
+  line-height: var(--chat-leading);
+}
+
+/* Visible focus indicator for keyboard users. */
+.chat-layout :focus-visible,
+[class^="chat-"]:focus-visible,
+[class*=" chat-"]:focus-visible {
+  outline: 2px solid var(--chat-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Screen-reader-only utility. Keeps content in the accessibility tree while
+ * removing it visually (used by --continued messages so the author name
+ * remains available to assistive tech). */
+.chat-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Respect reduced-motion preference. */
+@media (prefers-reduced-motion: reduce) {
+  [class^="chat-"],
+  [class*=" chat-"] {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

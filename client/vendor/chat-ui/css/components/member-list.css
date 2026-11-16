@@ -1,0 +1,68 @@
+/* member-list.css — panel created by ChatUI.memberList(), rendered inside the
+ * right pane (.chat-layout__aside). Tokens only. */
+.chat-member-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: var(--chat-text);
+}
+.chat-member-panel[hidden] {
+  display: none;
+}
+.chat-member-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--chat-space-2);
+  padding: var(--chat-space-2) var(--chat-space-3);
+  border-bottom: 1px solid var(--chat-border);
+}
+.chat-member-panel__title {
+  margin: 0;
+  font-size: var(--chat-text-md);
+  font-weight: var(--chat-weight-bold);
+}
+.chat-member-panel__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--chat-radius-md);
+  cursor: pointer;
+  color: var(--chat-text-muted);
+  background: transparent;
+}
+.chat-member-panel__close:hover {
+  color: var(--chat-text);
+  background: var(--chat-accent-soft);
+}
+.chat-member-panel__close:focus-visible,
+.chat-channel-header__meta:focus-visible {
+  outline: 2px solid var(--chat-accent);
+  outline-offset: 1px;
+}
+.chat-member-panel__list {
+  margin: 0;
+  padding: var(--chat-space-1);
+  overflow-y: auto;
+  list-style: none;
+}
+.chat-member-panel__item {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-space-2);
+  padding: var(--chat-space-1) var(--chat-space-2);
+  border-radius: var(--chat-radius-md);
+}
+.chat-member-panel__item:hover {
+  background: var(--chat-accent-soft);
+}
+.chat-member-panel__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

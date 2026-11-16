@@ -1,0 +1,101 @@
+/* layout.css — .chat-layout app shell grid. (R3.1–R3.4)
+ *
+ * Columns: sidebar | main | aside?. The right pane is omitted from the DOM
+ * when unused. Below 1100px the aside hides; below 768px the sidebar becomes
+ * an off-canvas panel toggled via .chat-layout[data-sidebar="open"].
+ */
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr) auto;
+  height: 100%;
+  min-height: 0;
+  color: var(--chat-text);
+  background: var(--chat-bg);
+}
+
+.chat-layout__sidebar {
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--chat-border);
+  background: var(--chat-surface-sunken);
+}
+
+.chat-layout__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chat-layout__aside {
+  min-height: 0;
+  overflow-y: auto;
+  width: 280px;
+  border-left: 1px solid var(--chat-border);
+  background: var(--chat-surface);
+}
+
+/* Scrim behind the off-canvas sidebar on narrow viewports; off by default. */
+.chat-layout__scrim {
+  display: none;
+}
+
+/* --- Hide the optional right pane below 1100px. --- */
+@media (max-width: 1100px) {
+  .chat-layout {
+    grid-template-columns: var(--chat-sidebar-width) minmax(0, 1fr);
+  }
+
+  .chat-layout__aside {
+    display: none;
+  }
+
+  /* An opened aside (e.g. the members list) overlays the right edge instead. */
+  .chat-layout__aside[data-open] {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 30;
+    height: 100%;
+    max-width: 85%;
+    box-shadow: var(--chat-shadow-popover);
+  }
+}
+
+/* --- Below 768px: single column; sidebar is an off-canvas panel. --- */
+@media (max-width: 767px) {
+  .chat-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chat-channel-header__menu {
+    display: inline-flex;
+  }
+
+  .chat-layout__sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    width: min(var(--chat-sidebar-width), 85%);
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform var(--chat-duration) var(--chat-ease);
+    box-shadow: var(--chat-shadow-popover);
+  }
+
+  .chat-layout[data-sidebar="open"] .chat-layout__sidebar {
+    transform: translateX(0);
+  }
+
+  .chat-layout[data-sidebar="open"] .chat-layout__scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: var(--chat-scrim);
+  }
+}

@@ -1,0 +1,28 @@
+/* date-divider.css — .chat-date-divider hairline with centered pill. (R5.5) */
+
+.chat-date-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-space-3);
+  margin: var(--chat-space-4) 0;
+}
+
+/* Hairline rules on both sides of the label. */
+.chat-date-divider::before,
+.chat-date-divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--chat-border);
+}
+
+.chat-date-divider__label {
+  flex: 0 0 auto;
+  padding: var(--chat-space-1) var(--chat-space-3);
+  border: 1px solid var(--chat-border);
+  border-radius: var(--chat-radius-full);
+  background: var(--chat-surface);
+  font-size: var(--chat-text-sm);
+  font-weight: var(--chat-weight-medium);
+  color: var(--chat-text-muted);
+}

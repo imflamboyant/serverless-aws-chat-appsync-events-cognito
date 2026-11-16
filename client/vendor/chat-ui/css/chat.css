@@ -1,0 +1,20 @@
+/* chat.css — convenience aggregator. @import works on file://.
+ *
+ * Hosts that want fewer requests can link the individual files instead, copying
+ * tokens.css, base.css, and only the component files they use.
+ */
+
+@import "tokens.css";
+@import "base.css";
+
+@import "components/avatar.css";
+@import "components/badge.css";
+@import "components/date-divider.css";
+@import "components/message.css";
+@import "components/mention.css";
+@import "components/message-list.css";
+@import "components/composer.css";
+@import "components/channel-list.css";
+@import "components/channel-header.css";
+@import "components/member-list.css";
+@import "components/layout.css";

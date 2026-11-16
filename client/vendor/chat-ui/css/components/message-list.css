@@ -1,0 +1,38 @@
+/* message-list.css — .chat-message-list scroller + .chat-jump-latest. (R6.8) */
+
+.chat-message-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--chat-space-4) 0;
+  background: var(--chat-bg);
+  color: var(--chat-text);
+}
+
+/* "Jump to latest" control, inserted after the list inside .chat-layout__main
+ * and positioned absolutely above the composer. */
+.chat-jump-latest {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--chat-composer-max-height) * 0 + var(--chat-space-6));
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--chat-space-1);
+  padding: var(--chat-space-2) var(--chat-space-4);
+  border: 0;
+  border-radius: var(--chat-radius-full);
+  font: inherit;
+  font-size: var(--chat-text-sm);
+  font-weight: var(--chat-weight-medium);
+  cursor: pointer;
+  color: var(--chat-accent-contrast);
+  background: var(--chat-accent);
+  box-shadow: var(--chat-shadow-popover);
+  z-index: 2;
+}
+
+.chat-jump-latest[hidden] {
+  display: none;
+}

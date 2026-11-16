@@ -1,0 +1,76 @@
+/* mention.css — inline .chat-mention and --self. (R8.6, R8.7)
+ * Popup styles (.chat-mention-popup*) are added in task 10 / FEAT-002.
+ */
+
+.chat-mention {
+  display: inline;
+  padding: 0 2px;
+  border-radius: var(--chat-radius-sm);
+  font-weight: var(--chat-weight-medium);
+  color: var(--chat-accent-strong);
+  background: var(--chat-accent-soft);
+}
+
+/* A mention of the current user gets further emphasis. */
+.chat-mention--self {
+  font-weight: var(--chat-weight-bold);
+  color: var(--chat-accent-contrast);
+  background: var(--chat-accent);
+}
+
+/* --- Mention popup (combobox listbox): created by ChatUI.mentions(). --- *
+ * Anchored above the composer input (the .chat-composer form is position:
+ * relative). The [hidden] attribute hides it when closed; tokens only. */
+
+.chat-mention-popup {
+  position: absolute;
+  bottom: 100%;
+  left: var(--chat-space-4);
+  right: auto;
+  z-index: 30;
+  margin: 0 0 var(--chat-space-2) 0;
+  padding: var(--chat-space-1);
+  max-height: 15rem;
+  min-width: 14rem;
+  max-width: calc(100% - var(--chat-space-4) * 2);
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--chat-border);
+  border-radius: var(--chat-radius-md);
+  background: var(--chat-surface);
+  box-shadow: var(--chat-shadow-popover);
+}
+
+.chat-mention-popup[hidden] {
+  display: none;
+}
+
+.chat-mention-popup__item {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-space-2);
+  padding: var(--chat-space-1) var(--chat-space-2);
+  border-radius: var(--chat-radius-sm);
+  cursor: pointer;
+  color: var(--chat-text);
+}
+
+/* Active option (keyboard selection or hover) uses the accent-soft tint. */
+.chat-mention-popup__item[aria-selected="true"],
+.chat-mention-popup__item:hover {
+  background: var(--chat-accent-soft);
+}
+
+.chat-mention-popup__name {
+  font-weight: var(--chat-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-mention-popup__handle {
+  margin-left: auto;
+  color: var(--chat-text-muted);
+  font-size: var(--chat-text-sm);
+  white-space: nowrap;
+}

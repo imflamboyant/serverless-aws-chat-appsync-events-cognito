@@ -1,0 +1,74 @@
+/* composer.css — .chat-composer form, input, send button. (R7.1, R7.2, R7.6) */
+
+.chat-composer {
+  position: relative; /* mention popup anchors above this */
+  display: flex;
+  align-items: flex-end;
+  gap: var(--chat-space-2);
+  padding: var(--chat-space-3) var(--chat-space-4);
+  border-top: 1px solid var(--chat-border);
+  background: var(--chat-surface);
+}
+
+.chat-composer__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  /* One line + vertical padding (2 x space-2) + 2px border. */
+  min-height: calc(var(--chat-text-md) * var(--chat-leading) + var(--chat-space-4) + 2px);
+  max-height: var(--chat-composer-max-height);
+  padding: var(--chat-space-2) var(--chat-space-3);
+  border: 1px solid var(--chat-border);
+  border-radius: var(--chat-radius-md);
+  font: inherit;
+  font-size: var(--chat-text-md);
+  line-height: var(--chat-leading);
+  color: var(--chat-text);
+  background: var(--chat-bg);
+  resize: none;
+  overflow-y: auto;
+}
+
+/* No accent ring on focus; the regular border just darkens slightly. */
+.chat-composer__input:focus,
+.chat-composer__input:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--chat-border) 85%, var(--chat-text));
+}
+
+.chat-composer__input::placeholder {
+  color: var(--chat-text-muted);
+}
+
+.chat-composer__send {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Match the input's min-height so the two line up (bottom-aligned). */
+  width: calc(var(--chat-text-md) * var(--chat-leading) + var(--chat-space-4) + 2px);
+  height: calc(var(--chat-text-md) * var(--chat-leading) + var(--chat-space-4) + 2px);
+  border: 0;
+  border-radius: var(--chat-radius-md);
+  cursor: pointer;
+  color: var(--chat-accent-contrast);
+  background: var(--chat-accent);
+  transition: opacity var(--chat-duration) var(--chat-ease);
+}
+
+.chat-composer__send > svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Visually disabled send button (JS toggles [disabled] on empty text). */
+.chat-composer__send[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Whole composer disabled by the host. */
+.chat-composer__input[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

@@ -1,0 +1,98 @@
+/* message.css — .chat-message grid, meta/author/time, body, --own, --continued.
+ * (R5.1, R5.2, R5.6, R5.7; design D1)
+ */
+
+.chat-message {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: var(--chat-space-3);
+  align-items: start;
+  padding: var(--chat-space-1) var(--chat-space-4);
+  color: var(--chat-text);
+  transition: background-color var(--chat-duration) var(--chat-ease);
+}
+
+.chat-message:hover,
+.chat-message--own:hover {
+  background: color-mix(in srgb, var(--chat-text) 2.5%, transparent);
+}
+
+.chat-message__content {
+  min-width: 0; /* allow the body to shrink/wrap inside the grid cell */
+}
+
+.chat-message__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--chat-space-2);
+  margin-bottom: 2px;
+}
+
+.chat-message__author {
+  font-size: var(--chat-text-md);
+  font-weight: var(--chat-weight-bold);
+  color: var(--chat-text);
+}
+
+.chat-message__time {
+  font-size: var(--chat-text-sm);
+  color: var(--chat-text-muted);
+}
+
+.chat-message__body {
+  font-size: var(--chat-text-md);
+  color: var(--chat-text);
+  /* Preserve sender line breaks (R5.6) and wrap long unbroken strings (R5.7). */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* --- Own messages: styled like any other message (no accent), as in Slack.
+ * Kept as a hook for host overrides. --- */
+.chat-message--own {
+  background: transparent;
+}
+
+/* --- Continued messages: hide the avatar but keep its column for alignment;
+ * visually hide the author so it stays in the a11y tree (NOT display:none),
+ * and surface the timestamp on hover in the avatar gutter. --- */
+.chat-message--continued {
+  position: relative;
+}
+
+.chat-message--continued > .chat-avatar {
+  visibility: hidden;
+}
+
+/* Author name: visually hidden but readable by assistive tech. */
+.chat-message--continued .chat-message__author {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Timestamp sits in the (now empty) avatar gutter, revealed on hover. */
+.chat-message--continued .chat-message__meta {
+  margin-bottom: 0;
+}
+
+.chat-message--continued .chat-message__time {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 36px;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity var(--chat-duration) var(--chat-ease);
+}
+
+.chat-message--continued:hover .chat-message__time {
+  opacity: 1;
+}

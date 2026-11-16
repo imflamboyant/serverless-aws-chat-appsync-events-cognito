@@ -1,0 +1,118 @@
+/* tokens.css — all --chat-* design tokens, light + dark themes.
+ *
+ * The only accent input is --chat-accent. Every accent-derived color is
+ * computed from it with color-mix(), so overriding --chat-accent (e.g. on
+ * <html>) restyles tints, badges, focus ring, and mentions in one place.
+ *
+ * Theming selectors (design §2):
+ *   :root                                        -> light defaults
+ *   @media (prefers-color-scheme: dark)
+ *     :root:not([data-theme])                    -> OS dark when unset
+ *   [data-theme="dark"]                          -> explicit dark
+ *   [data-theme="light"]                         -> explicit light
+ *
+ * There is no build step, so the dark color block is duplicated in two
+ * selectors. KEEP IN SYNC: any edit to one dark block must be mirrored in the
+ * other (decision D8).
+ */
+
+:root {
+  /* --- Space --- */
+  --chat-space-1: 4px;
+  --chat-space-2: 8px;
+  --chat-space-3: 12px;
+  --chat-space-4: 16px;
+  --chat-space-5: 24px;
+  --chat-space-6: 32px;
+
+  /* --- Type (system stack, no web fonts) --- */
+  --chat-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --chat-text-sm: 13px;
+  --chat-text-md: 15px;
+  --chat-text-lg: 17px;
+  --chat-leading: 1.5;
+  --chat-weight-regular: 400;
+  --chat-weight-medium: 500;
+  --chat-weight-bold: 700;
+
+  /* --- Shape --- */
+  --chat-radius-sm: 4px;
+  --chat-radius-md: 8px;
+  --chat-radius-lg: 12px;
+  --chat-radius-full: 999px;
+
+  /* --- Elevation --- */
+  --chat-shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  /* --- Motion --- */
+  --chat-duration: 120ms;
+  --chat-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* --- Layout --- */
+  --chat-sidebar-width: 260px;
+  --chat-composer-max-height: 12rem;
+
+  /* --- Color: light theme --- */
+  --chat-bg: #ffffff;
+  --chat-surface: #ffffff;
+  --chat-surface-sunken: #f4f5f7;
+  --chat-text: #1a1d21;
+  --chat-text-muted: #616a75;
+  --chat-border: #e2e5e9;
+  --chat-accent: #5b5bd6;
+  --chat-accent-contrast: #ffffff;
+  --chat-danger: #d1403f;
+  --chat-scrim: rgba(16, 18, 23, 0.4);
+
+  /* --- Derived from --chat-accent (same in both themes) --- */
+  --chat-accent-soft: color-mix(in srgb, var(--chat-accent) 12%, transparent);
+  --chat-accent-strong: color-mix(in srgb, var(--chat-accent) 85%, var(--chat-text));
+  --chat-focus-ring: color-mix(in srgb, var(--chat-accent) 70%, transparent);
+}
+
+/* OS prefers dark and the host has not set an explicit theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* --- Color: dark theme --- (KEEP IN SYNC with [data-theme="dark"]) */
+    --chat-bg: #16181d;
+    --chat-surface: #1f2228;
+    --chat-surface-sunken: #121419;
+    --chat-text: #e8eaed;
+    --chat-text-muted: #9aa3af;
+    --chat-border: #2d3139;
+    --chat-accent: #8e8ef0;
+    --chat-accent-contrast: #15151f;
+    --chat-danger: #f07a79;
+    --chat-scrim: rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Explicit dark overrides OS preference. */
+[data-theme="dark"] {
+  /* --- Color: dark theme --- (KEEP IN SYNC with the prefers-color-scheme block) */
+  --chat-bg: #16181d;
+  --chat-surface: #1f2228;
+  --chat-surface-sunken: #121419;
+  --chat-text: #e8eaed;
+  --chat-text-muted: #9aa3af;
+  --chat-border: #2d3139;
+  --chat-accent: #8e8ef0;
+  --chat-accent-contrast: #15151f;
+  --chat-danger: #f07a79;
+  --chat-scrim: rgba(0, 0, 0, 0.6);
+}
+
+/* Explicit light overrides OS preference. */
+[data-theme="light"] {
+  --chat-bg: #ffffff;
+  --chat-surface: #ffffff;
+  --chat-surface-sunken: #f4f5f7;
+  --chat-text: #1a1d21;
+  --chat-text-muted: #616a75;
+  --chat-border: #e2e5e9;
+  --chat-accent: #5b5bd6;
+  --chat-accent-contrast: #ffffff;
+  --chat-danger: #d1403f;
+  --chat-scrim: rgba(16, 18, 23, 0.4);
+}

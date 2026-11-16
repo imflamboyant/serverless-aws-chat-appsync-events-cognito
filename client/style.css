@@ -1,0 +1,32 @@
+/* Host page only. The chat itself is styled by vendor/chat-ui. */
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--chat-bg);
+  color: var(--chat-text);
+  font-family: var(--chat-font);
+}
+.app-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-space-4);
+  padding: var(--chat-space-2) var(--chat-space-4);
+  border-bottom: 1px solid var(--chat-border);
+  background: var(--chat-surface);
+  font-size: var(--chat-text-sm);
+}
+.app-topbar__title { margin: 0; font-size: var(--chat-text-md); font-weight: var(--chat-weight-bold); }
+.app-topbar__status { margin: 0 0 0 auto; color: var(--chat-danger); }
+.app-topbar__user { color: var(--chat-text-muted); }
+.app-button {
+  font: inherit;
+  color: var(--chat-text);
+  background: var(--chat-surface);
+  border: 1px solid var(--chat-border);
+  border-radius: var(--chat-radius-md);
+  padding: var(--chat-space-1) var(--chat-space-3);
+  cursor: pointer;
+}
+.app-button:hover { background: var(--chat-accent-soft); }
+.app-main { flex: 1; min-height: 0; }

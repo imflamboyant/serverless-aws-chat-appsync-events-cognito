@@ -1,0 +1,32 @@
+{
+  "name": "chat-appsync-events-cognito",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "chat-appsync-events-cognito": "bin/app.ts"
+  },
+  "scripts": {
+    "deploy": "cdk deploy --outputs-file cdk-outputs.json && node scripts/write-config.mjs",
+    "seed": "node scripts/seed.mjs",
+    "guard": "node scripts/guard.mjs",
+    "client": "python3 -m http.server 5173 --directory client",
+    "destroy": "cdk destroy",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-appsync/utils": "^2.0.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.902.0",
+    "@aws-sdk/client-dynamodb": "^3.902.0",
+    "@aws-sdk/lib-dynamodb": "^3.902.0",
+    "@types/aws-lambda": "^8.10.155",
+    "@types/node": "22.7.9",
+    "aws-cdk": "2.1114.1",
+    "esbuild": "^0.25.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.6.3"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "2.245.0",
+    "constructs": "^10.0.0"
+  }
+}
