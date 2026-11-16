@@ -37,6 +37,13 @@ async function get(path, t) {
     return fetch(restApi + path, { headers: authHeader(t) });
 }
 
+// Status plus message, to tell who rejected the request: the Cognito authorizer
+// answers 403 "Access Denied" for an invalid token, the Lambda 403 "Forbidden" for a non-member
+async function statusAndMessage(path, t) {
+    const response = await get(path, t);
+    return `${response.status} ${(await response.json()).message}`;
+}
+
 async function httpPublish(channel, event, t) {
     const response = await fetch(`https://${httpDns}/event`, {
         method: 'POST',
@@ -85,7 +92,7 @@ const checks = [
         const channels = await (await get('/channels', token)).json();
         return channels.some((c) => c.id === 'leads') ? 'yes' : 'no';
     }],
-    ['GET #leads history', 403, async () => (await get('/channels/leads/messages', token)).status],
+    ['GET #leads history', '403 Forbidden', () => statusAndMessage('/channels/leads/messages', token)],
     ['WebSocket subscribe to #leads', 'subscribe_error', () => ws(token, subscribe(LEADS))],
     ['WebSocket subscribe to /serverlesschat/channels/*', 'subscribe_error', () => ws(token, subscribe('/serverlesschat/channels/*'))],
     ['WebSocket subscribe to /serverlesschat/*', 'subscribe_error', () => ws(token, subscribe('/serverlesschat/*'))],
@@ -97,7 +104,7 @@ const checks = [
         return history.at(-1).username;
     }],
     ['GET #general history, no token', 401, async () => (await get('/channels/general/messages')).status],
-    ['GET #general history, tampered token', 401, async () => (await get('/channels/general/messages', tampered)).status],
+    ['GET #general history, tampered token', '403 Access Denied', () => statusAndMessage('/channels/general/messages', tampered)],
     ['HTTP publish to #general, no token', 401, () => httpPublish(GENERAL, { message: 'guard test' })],
     ['HTTP publish to #general, tampered token', 401, () => httpPublish(GENERAL, { message: 'guard test' }, tampered)],
     ['WebSocket connect, tampered token', 'connection rejected', () => ws(tampered, subscribe(GENERAL))],
