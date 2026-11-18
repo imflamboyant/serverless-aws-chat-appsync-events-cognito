@@ -2,23 +2,30 @@
 
 Part 5 of the serverless chat series. Previous parts used an API key for AppSync Events.
 
-## Proposed section titles
+## Proposed sections
 
-1. Why the API key has to go
-2. What we're building
-3. A Cognito user pool with managed login
-4. Signing in without a library: authorization code and PKCE
-5. Who is a member of which channel
-6. One token for both APIs
-7. Cognito auth on the Event API
-8. Checking membership on subscribe
-9. Checking membership on publish, in one DynamoDB transaction
-10. Never trust the author in the payload
-11. Cognito auth and membership checks on the REST API
-12. Seeding users and memberships
-13. Proving the guards
-14. What happens when the token expires
-15. What's left out
+1. **What we're building**
+   - Channels, users, and who sees what
+   - Architecture
+   - The memberships table
+2. **Signing in with Cognito**
+   - User pool and managed login
+   - Authorization code with PKCE, without a library
+   - Seeding users
+3. **Cognito auth on both APIs**
+   - Auth options for AppSync Events
+   - The Event API: connect, publish and subscribe
+   - The REST API: Cognito authorizer
+   - Which token: ID or access
+4. **Checking membership at every entry point**
+   - Subscribe: onSubscribe and wildcards
+   - Publish over WebSocket and HTTP: onPublish in one transaction
+   - The author comes from the token
+   - Message history and the channel list
+5. **Proving the guards**
+   - The guard script and its results
+   - What happens when the token expires
+   - What's left out
 
 ## Decisions
 
@@ -75,6 +82,13 @@ Tested with the ID token validity set to 5 minutes, the Cognito minimum.
   doesn't end an open subscription. It runs until the client unsubscribes or the connection
   closes, which AppSync does after 24 hours at most. I only observed up to 3 minutes after
   expiry; the 24 hours comes from the WebSocket protocol docs.
+- The Event API docs describe no server-side way to end a subscription. AppSync GraphQL APIs
+  have one (subscription invalidation).
+- If member removal is added later, two ways to make it take effect at once:
+  - A generation number in the channel path, bumped on removal. The handlers accept only
+    the current generation, so the old path goes quiet for the removed member.
+  - One inbox channel per user, with a Lambda that checks membership and publishes to each
+    member's inbox. One publish per member per message.
 
 Side note: removing `idTokenValidity` from the CDK code doesn't reset Cognito's value.
 CloudFormation drops the property and Cognito keeps the old setting, so the stack now sets
