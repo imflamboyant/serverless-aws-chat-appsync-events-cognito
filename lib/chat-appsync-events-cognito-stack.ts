@@ -49,6 +49,8 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
         // public client for the browser: authorization code grant with PKCE, no client secret
         const userPoolClient = userPool.addClient('ChatWebClient', {
             generateSecret: false,
+            // the Cognito default, set explicitly: removing the property later doesn't reset it
+            idTokenValidity: cdk.Duration.hours(1),
             // ADMIN_USER_PASSWORD_AUTH lets the guard script sign in with your AWS credentials
             authFlows: {adminUserPassword: true},
             oAuth: {
