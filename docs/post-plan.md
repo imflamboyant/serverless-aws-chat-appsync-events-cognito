@@ -44,17 +44,17 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
 ## Guard results
 
 From the commands in the README's "Prove the guards", signed in as carol, who isn't a
-member of #leads.
+member of #engineering.
 
 | As carol                                              | Rejected by        | Result                  |
 | ----------------------------------------------------- | ------------------ | ----------------------- |
-| GET /channels                                         | Lambda             | #leads not listed       |
-| GET #leads history                                    | Lambda             | 403 `Forbidden`         |
-| Subscribe to #leads over WebSocket                    | onSubscribe        | `subscribe_error`       |
+| GET /channels                                         | Lambda             | #engineering not listed       |
+| GET #engineering history                                    | Lambda             | 403 `Forbidden`         |
+| Subscribe to #engineering over WebSocket                    | onSubscribe        | `subscribe_error`       |
 | Subscribe to `/serverlesschat/channels/*`             | onSubscribe        | `subscribe_error`       |
 | Subscribe to `/serverlesschat/*`                      | onSubscribe        | `subscribe_error`       |
-| Publish to #leads over WebSocket                      | onPublish          | `publish_error`         |
-| Publish to #leads via the Events HTTP endpoint        | onPublish          | 401                     |
+| Publish to #engineering over WebSocket                      | onPublish          | `publish_error`         |
+| Publish to #engineering via the Events HTTP endpoint        | onPublish          | 401                     |
 | REST API, no token                                    | Cognito authorizer | 401                     |
 | REST API, tampered token                              | Cognito authorizer | 403 `Access Denied`     |
 | Events HTTP endpoint, no token                        | Event API auth     | 401                     |
@@ -63,7 +63,7 @@ member of #leads.
 
 Controls: carol gets 200 for #general history and `subscribe_success` for #general.
 
-- After the rejected publishes, #leads had 0 messages. The failed membership check cancels
+- After the rejected publishes, #engineering had 0 messages. The failed membership check cancels
   the whole transaction, so nothing is written.
 - API Gateway answers a bad token with 403 `Access Denied`, not 401. The non-member 403
   comes from our Lambda, with the message `Forbidden`.

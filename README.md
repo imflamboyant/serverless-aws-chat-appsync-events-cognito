@@ -79,12 +79,12 @@ splits on them.
 
 ```shell
 export SEED_PASSWORD='...'
-./scripts/create-user.sh alice "$SEED_PASSWORD" general random leads
-./scripts/create-user.sh bob "$SEED_PASSWORD" general random leads
+./scripts/create-user.sh alice "$SEED_PASSWORD" general random engineering
+./scripts/create-user.sh bob "$SEED_PASSWORD" general random engineering
 ./scripts/create-user.sh carol "$SEED_PASSWORD" general random
 ```
 
-carol isn't a member of #leads, so she's the one to test the membership checks with.
+carol isn't a member of #engineering, so she's the one to test the membership checks with.
 
 ## Run the client
 
@@ -101,7 +101,7 @@ won't work.
 
 ## Prove the guards
 
-The UI never offers #leads to carol, so the browser only shows that the UI hides it. The
+The UI never offers #engineering to carol, so the browser only shows that the UI hides it. The
 commands below sign in as carol and call each entry point directly. The comments show what
 each one returns.
 
@@ -119,20 +119,20 @@ TOKEN=$(aws cognito-idp admin-initiate-auth \
 ### REST API
 
 ```shell
-# carol's channels: #general and #random with their members, no #leads
+# carol's channels: #general and #random with their members, no #engineering
 curl -s -H "Authorization: $TOKEN" "${REST_API}channels"
 
-# #leads history: {"message":"Forbidden"} 403, from the Lambda's membership check
-curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "${REST_API}channels/leads/messages"
+# #engineering history: {"message":"Forbidden"} 403, from the Lambda's membership check
+curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "${REST_API}channels/engineering/messages"
 ```
 
 ### Events HTTP endpoint
 
 ```shell
-# publish to #leads: 401 "Not authorized to access channel", from onPublish
+# publish to #engineering: 401 "Not authorized to access channel", from onPublish
 curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
   -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"channel":"/serverlesschat/channels/leads","events":["{\"message\":\"hi\"}"]}'
+  -d '{"channel":"/serverlesschat/channels/engineering","events":["{\"message\":\"hi\"}"]}'
 
 ```
 
@@ -147,18 +147,18 @@ WS="wss://$EVENTS_REALTIME/event/realtime"
 AUTH=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TOKEN")
 HEADER=$(printf '%s' "$AUTH" | base64 | tr '+/' '-_' | tr -d '\n=')
 
-# subscribe to #leads: subscribe_error, from onSubscribe
+# subscribe to #engineering: subscribe_error, from onSubscribe
 SUBSCRIBE=$(printf '{"type":"subscribe","id":"1","channel":"%s","authorization":%s}' \
-  /serverlesschat/channels/leads "$AUTH")
+  /serverlesschat/channels/engineering "$AUTH")
 npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$SUBSCRIBE"
 
-# publish to #leads: publish_error, from onPublish
+# publish to #engineering: publish_error, from onPublish
 PUBLISH=$(printf '{"type":"publish","id":"1","channel":"%s","events":["{\\"message\\":\\"hi\\"}"],"authorization":%s}' \
-  /serverlesschat/channels/leads "$AUTH")
+  /serverlesschat/channels/engineering "$AUTH")
 npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$PUBLISH"
 ```
 
-To try the wildcards, replace `/serverlesschat/channels/leads` in `SUBSCRIBE` with
+To try the wildcards, replace `/serverlesschat/channels/engineering` in `SUBSCRIBE` with
 `/serverlesschat/channels/*` or `/serverlesschat/*`: both get `subscribe_error`. With
 `/serverlesschat/channels/general`, carol gets `subscribe_success`.
 
