@@ -5,6 +5,7 @@ import * as path from 'path';
 import {AttributeType, BillingMode, Table} from 'aws-cdk-lib/aws-dynamodb';
 import {NodejsFunction} from 'aws-cdk-lib/aws-lambda-nodejs';
 import {Runtime} from 'aws-cdk-lib/aws-lambda';
+import {LogGroup, RetentionDays} from 'aws-cdk-lib/aws-logs';
 import {
     AuthorizationType,
     CognitoUserPoolsAuthorizer,
@@ -98,10 +99,16 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             MEMBERSHIPS_TABLE: membershipsTable.tableName,
             CLIENT_ORIGIN,
         };
+        // a week of logs, deleted with the stack
+        const weekOfLogs = (id: string) => new LogGroup(this, id, {
+            retention: RetentionDays.ONE_WEEK,
+            removalPolicy: RemovalPolicy.DESTROY,
+        });
         const listChannelsLambda = new NodejsFunction(this, 'ListChannelsLambda', {
             runtime: Runtime.NODEJS_24_X,
             entry: path.join(__dirname, '../src/lambda/list-channels.ts'),
             environment: lambdaEnvironment,
+            logGroup: weekOfLogs('ListChannelsLogs'),
         });
         membershipsTable.grantReadData(listChannelsLambda);
 
@@ -109,6 +116,7 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             runtime: Runtime.NODEJS_24_X,
             entry: path.join(__dirname, '../src/lambda/get-messages.ts'),
             environment: lambdaEnvironment,
+            logGroup: weekOfLogs('GetMessagesLogs'),
         });
         membershipsTable.grantReadData(getMessagesLambda);
         messagesTable.grantReadData(getMessagesLambda);
