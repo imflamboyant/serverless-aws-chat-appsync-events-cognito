@@ -1,7 +1,7 @@
 #!/bin/sh
 # Creates a Cognito user and adds it to channels.
 # Usage: ./scripts/create-user.sh <username> <password> <channel>...
-# Needs USER_POOL_ID (the UserPoolId stack output), the AWS CLI and jq.
+# Needs USER_POOL_ID (the UserPoolId stack output) and the AWS CLI.
 set -eu
 
 if [ $# -lt 3 ] || [ -z "${USER_POOL_ID:-}" ]; then
@@ -25,8 +25,8 @@ aws cognito-idp admin-set-user-password \
 
 for CHANNEL in "$@"; do
   aws dynamodb put-item --table-name serverless-chat-cognito-memberships \
-    --item "$(jq -nc --arg channel "$CHANNEL" --arg userId "$SUB" --arg username "$USERNAME" \
-      '{channel: {S: $channel}, userId: {S: $userId}, username: {S: $username}}')"
+    --item "$(printf '{"channel":{"S":"%s"},"userId":{"S":"%s"},"username":{"S":"%s"}}' \
+      "$CHANNEL" "$SUB" "$USERNAME")"
 done
 
 echo "$USERNAME ($SUB): $*"

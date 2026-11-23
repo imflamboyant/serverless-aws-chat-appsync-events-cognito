@@ -99,14 +99,14 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             CLIENT_ORIGIN,
         };
         const listChannelsLambda = new NodejsFunction(this, 'ListChannelsLambda', {
-            runtime: Runtime.NODEJS_22_X,
+            runtime: Runtime.NODEJS_24_X,
             entry: path.join(__dirname, '../src/lambda/list-channels.ts'),
             environment: lambdaEnvironment,
         });
         membershipsTable.grantReadData(listChannelsLambda);
 
         const getMessagesLambda = new NodejsFunction(this, 'GetMessagesLambda', {
-            runtime: Runtime.NODEJS_22_X,
+            runtime: Runtime.NODEJS_24_X,
             entry: path.join(__dirname, '../src/lambda/get-messages.ts'),
             environment: lambdaEnvironment,
         });

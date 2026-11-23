@@ -7,7 +7,7 @@
   },
   "scripts": {
     "deploy": "cdk deploy",
-    "client": "python3 -m http.server 5173 --directory client",
+    "client": "npx http-server client -p 5173 -c-1",
     "destroy": "cdk destroy",
     "cdk": "cdk"
   },

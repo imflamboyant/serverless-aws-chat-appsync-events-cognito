@@ -26,10 +26,8 @@ Install these yourself:
 
 | Tool | Version | Used for |
 | --- | --- | --- |
-| Node.js and npm | 22 or later | CDK and the Lambda code. The Lambdas run on Node.js 22. |
+| Node.js and npm | 24 or later | CDK, serving the client. The Lambdas also run on Node.js 24. |
 | AWS CLI | v2 | Deploy credentials, `scripts/create-user.sh`, proving the guards |
-| Python | 3.x | Serving the client with `python3 -m http.server` |
-| jq | 1.6 or later | `scripts/create-user.sh`, proving the guards |
 | curl | any | Proving the guards |
 | A POSIX shell | sh, bash or zsh | The scripts and commands. On Windows, use WSL. |
 
@@ -45,11 +43,11 @@ You also need:
 - the CDK CLI (`aws-cdk`) 2.1114.1, run through `npx cdk` or the npm scripts
 - TypeScript 5.6
 
-There's no need to install the CDK CLI globally. `npx wscat` downloads wscat 6 the first
-time you prove the guards over the WebSocket.
+There's no need to install the CDK CLI globally. `npx` downloads two more tools the first
+time you use them: http-server, to serve the client, and wscat, to prove the guards over the
+WebSocket.
 
-Tested with Node.js 24, AWS CLI 2.32, Python 3.13, jq 1.7 and curl 8.7, on macOS in
-eu-central-1.
+Tested with Node.js 24, AWS CLI 2.32 and curl 8.7, on macOS in eu-central-1.
 
 ## Deploy
 
@@ -120,8 +118,8 @@ TOKEN=$(aws cognito-idp admin-initiate-auth \
 ### REST API
 
 ```shell
-# carol's channels: general and random, no leads
-curl -s -H "Authorization: $TOKEN" "${REST_API}channels" | jq -r '.[].id'
+# carol's channels: #general and #random with their members, no #leads
+curl -s -H "Authorization: $TOKEN" "${REST_API}channels"
 
 # #leads history: {"message":"Forbidden"} 403, from the Lambda's membership check
 curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "${REST_API}channels/leads/messages"
@@ -135,12 +133,14 @@ curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
   -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/leads","events":["{\"message\":\"hi\"}"]}'
 
-# publish to #general claiming to be alice: 200, but the stored author is carol
+# publish to #general claiming to be alice: 200
 curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
   -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi, I am alice\",\"username\":\"alice\"}"]}'
-curl -s -H "Authorization: $TOKEN" "${REST_API}channels/general/messages" | jq -r '.[-1] | "\(.username): \(.message)"'
 ```
+
+Open #general in the chat: "hi, I am alice" shows as Carol's message, because onPublish takes
+the author from the token, not from the payload.
 
 ### WebSocket
 
@@ -150,23 +150,23 @@ one message with `-x` and waits 3 seconds for the reply with `-w 3`.
 
 ```shell
 WS="wss://$EVENTS_REALTIME/event/realtime"
-AUTH=$(jq -nc --arg host "$EVENTS_HTTP" --arg token "$TOKEN" '{host: $host, Authorization: $token}')
+AUTH=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TOKEN")
 HEADER=$(printf '%s' "$AUTH" | base64 | tr '+/' '-_' | tr -d '\n=')
 
 # subscribe to #leads: subscribe_error, from onSubscribe
-SUBSCRIBE=$(jq -nc --argjson auth "$AUTH" \
-  '{type: "subscribe", id: "1", channel: "/serverlesschat/channels/leads", authorization: $auth}')
+SUBSCRIBE=$(printf '{"type":"subscribe","id":"1","channel":"%s","authorization":%s}' \
+  /serverlesschat/channels/leads "$AUTH")
 npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$SUBSCRIBE"
 
 # publish to #leads: publish_error, from onPublish
-PUBLISH=$(jq -nc --argjson auth "$AUTH" \
-  '{type: "publish", id: "1", channel: "/serverlesschat/channels/leads", events: [{message: "hi"} | tojson], authorization: $auth}')
+PUBLISH=$(printf '{"type":"publish","id":"1","channel":"%s","events":["{\\"message\\":\\"hi\\"}"],"authorization":%s}' \
+  /serverlesschat/channels/leads "$AUTH")
 npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$PUBLISH"
 ```
 
-To try the wildcards, change the subscribe channel to `/serverlesschat/channels/*` or
-`/serverlesschat/*`: both get `subscribe_error`. With `/serverlesschat/channels/general`,
-carol gets `subscribe_success`.
+To try the wildcards, replace `/serverlesschat/channels/leads` in `SUBSCRIBE` with
+`/serverlesschat/channels/*` or `/serverlesschat/*`: both get `subscribe_error`. With
+`/serverlesschat/channels/general`, carol gets `subscribe_success`.
 
 ### No token or a tampered token
 
@@ -184,7 +184,7 @@ curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" -H "Authorization: $TA
   -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi\"}"]}'
 
 # WebSocket connect: connection_error, 401
-BAD=$(jq -nc --arg host "$EVENTS_HTTP" --arg token "$TAMPERED" '{host: $host, Authorization: $token}' \
+BAD=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TAMPERED" \
   | base64 | tr '+/' '-_' | tr -d '\n=')
 npx wscat -s aws-appsync-event-ws -s "header-$BAD" -c "$WS" -w 3 -x '{"type":"connection_init"}'
 ```
