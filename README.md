@@ -13,7 +13,7 @@ is gone, and so is the trust in whatever the client sends.
   `serverlesschat` namespace has two handlers (`src/appsyncjs/serverlesschat-handler.js`):
   - `onSubscribe` reads the membership item and rejects non-members and wildcard channels.
   - `onPublish` writes the messages in one DynamoDB transaction with a condition check on the
-    membership item. The author comes from the token, not from the payload.
+    membership item.
 - **REST API** (API Gateway + Lambda) behind a Cognito authorizer:
   - `GET /channels`: the caller's channels and their members.
   - `GET /channels/{channel}/messages`: message history, members only.
@@ -133,14 +133,7 @@ curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
   -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/leads","events":["{\"message\":\"hi\"}"]}'
 
-# publish to #general claiming to be alice: 200
-curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
-  -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi, I am alice\",\"username\":\"alice\"}"]}'
 ```
-
-Open #general in the chat: "hi, I am alice" shows as Carol's message, because onPublish takes
-the author from the token, not from the payload.
 
 ### WebSocket
 
@@ -189,7 +182,6 @@ BAD=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TAMPERED" \
 npx wscat -s aws-appsync-event-ws -s "header-$BAD" -c "$WS" -w 3 -x '{"type":"connection_init"}'
 ```
 
-The publish to #general posts one message there.
 
 ## Cleanup
 

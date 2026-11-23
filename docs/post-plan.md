@@ -20,7 +20,6 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
 4. **Checking membership at every entry point**
    - Subscribe: onSubscribe and wildcards
    - Publish over WebSocket and HTTP: onPublish in one transaction
-   - The author comes from the token
    - Message history and the channel list
 5. **Proving the guards**
    - Calling each entry point as carol
@@ -37,7 +36,6 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
   (`client/js/auth.js`). No Amplify, because the client has no build step.
 - **Token:** the ID token for both APIs. The AppSync Events docs specify it for Cognito, and
   the API Gateway Cognito authorizer expects it when the method has no OAuth scopes.
-- **Author:** taken from `ctx.identity` in onPublish, never from the message payload.
 - **Channels endpoint:** `GET /channels` returns the caller's channels and their members.
   It reads the user from the token, so there's no parameter to tamper with.
 
@@ -55,7 +53,6 @@ member of #leads.
 | Subscribe to `/serverlesschat/*`                      | onSubscribe        | `subscribe_error`       |
 | Publish to #leads over WebSocket                      | onPublish          | `publish_error`         |
 | Publish to #leads via the Events HTTP endpoint        | onPublish          | 401                     |
-| Publish to #general with `username: alice` in payload | onPublish          | stored author is carol  |
 | REST API, no token                                    | Cognito authorizer | 401                     |
 | REST API, tampered token                              | Cognito authorizer | 403 `Access Denied`     |
 | Events HTTP endpoint, no token                        | Event API auth     | 401                     |
