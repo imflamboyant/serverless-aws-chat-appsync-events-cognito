@@ -11,7 +11,7 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
 2. **Signing in with Cognito**
    - User pool and managed login
    - Sign-in with Amplify Auth: authorization code and PKCE
-   - Seeding users
+   - Creating users
 3. **Cognito auth on both APIs**
    - Auth options for AppSync Events
    - The Event API: connect, publish and subscribe
@@ -21,8 +21,12 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
    - Subscribe: onSubscribe and wildcards
    - Publish over WebSocket and HTTP: onPublish in one transaction
    - Message history and the channel list
-5. **Proving the guards**
-   - Calling each entry point as carol
+5. **Running the demo**
+   - Deploy
+   - Create users
+   - Run the client
+   - Clean up
+6. **Limits**
    - What happens when the token expires
    - What's left out
 
@@ -43,8 +47,8 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
 
 ## Guard results
 
-From the commands in the README's "Prove the guards", signed in as carol, who isn't a
-member of #engineering.
+Checked during development by calling each entry point directly as carol, who isn't a
+member of #engineering. The calls aren't in the post or the README; the findings can be.
 
 | As carol                                              | Rejected by        | Result                  |
 | ----------------------------------------------------- | ------------------ | ----------------------- |

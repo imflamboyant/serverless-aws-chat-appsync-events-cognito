@@ -52,8 +52,8 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             generateSecret: false,
             // the Cognito default, set explicitly: removing the property later doesn't reset it
             idTokenValidity: cdk.Duration.hours(1),
-            // ADMIN_USER_PASSWORD_AUTH lets the AWS CLI sign in with your AWS credentials (README)
-            authFlows: {adminUserPassword: true},
+            // managed login only: no sign-in through the Cognito API, just token refresh
+            authFlows: {userSrp: false},
             oAuth: {
                 flows: {authorizationCodeGrant: true},
                 scopes: [OAuthScope.OPENID, OAuthScope.PROFILE],
