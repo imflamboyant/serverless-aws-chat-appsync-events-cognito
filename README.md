@@ -73,15 +73,15 @@ CDK can't set Cognito passwords, so `scripts/create-user.sh` creates each user a
 deploy. It runs three AWS CLI commands: create the user, set a permanent password, and write
 one membership item per channel.
 
-The password needs at least 8 characters with upper and lower case letters, a number and a
-symbol. Leave out commas: the sign-in command in [Prove the guards](#prove-the-guards)
-splits on them.
+Replace `<password>` with a password of your choice. It needs at least 8 characters with upper
+and lower case letters, a number and a symbol. Leave out single quotes, because the commands
+wrap the password in them, and commas, because the sign-in command in
+[Prove the guards](#prove-the-guards) splits on them.
 
 ```shell
-export SEED_PASSWORD='...'
-./scripts/create-user.sh alice "$SEED_PASSWORD" general random engineering
-./scripts/create-user.sh bob "$SEED_PASSWORD" general random engineering
-./scripts/create-user.sh carol "$SEED_PASSWORD" general random
+./scripts/create-user.sh alice '<password>' general random engineering
+./scripts/create-user.sh bob '<password>' general random engineering
+./scripts/create-user.sh carol '<password>' general random
 ```
 
 carol isn't a member of #engineering, so she's the one to test the membership checks with.
@@ -112,7 +112,7 @@ browser is needed:
 TOKEN=$(aws cognito-idp admin-initiate-auth \
   --user-pool-id "$USER_POOL_ID" --client-id "$CLIENT_ID" \
   --auth-flow ADMIN_USER_PASSWORD_AUTH \
-  --auth-parameters "USERNAME=carol,PASSWORD=$SEED_PASSWORD" \
+  --auth-parameters 'USERNAME=carol,PASSWORD=<password>' \
   --query AuthenticationResult.IdToken --output text)
 ```
 
