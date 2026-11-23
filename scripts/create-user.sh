@@ -1,17 +1,16 @@
 #!/bin/sh
 # Creates a Cognito user and adds it to channels.
-# Usage: ./scripts/create-user.sh <UserPoolId> <username> <password> <channel>...
-# Needs the AWS CLI. <UserPoolId> is the UserPoolId output of the deploy.
+# Usage: ./scripts/create-user.sh <username> <password> <channel>...
+# Needs USER_POOL_ID (the UserPoolId stack output) and the AWS CLI.
 set -eu
 
-if [ $# -lt 4 ]; then
-  echo "Usage: $0 <UserPoolId> <username> <password> <channel>..." >&2
+if [ $# -lt 3 ] || [ -z "${USER_POOL_ID:-}" ]; then
+  echo "Usage: USER_POOL_ID=... $0 <username> <password> <channel>..." >&2
   exit 1
 fi
-USER_POOL_ID=$1
-USERNAME=$2
-PASSWORD=$3
-shift 3
+USERNAME=$1
+PASSWORD=$2
+shift 2
 
 # no invitation email; prints the user's sub, the key of the membership items
 SUB=$(aws cognito-idp admin-create-user \

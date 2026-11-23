@@ -57,8 +57,15 @@ npm install
 npm run deploy
 ```
 
-The deploy prints the stack outputs. The next steps use them as placeholders such as
-`<UserPoolId>`: replace each one with its output. `<RestApiUrl>` ends with a slash.
+The deploy prints the stack outputs. Export them for the next steps:
+
+```shell
+export USER_POOL_ID=<UserPoolId>
+export CLIENT_ID=<UserPoolClientId>
+export REST_API=<RestApiUrl>              # ends with a slash
+export EVENTS_HTTP=<EventApiHttpDns>
+export EVENTS_REALTIME=<EventApiRealtimeDns>
+```
 
 ## Create users and channels
 
@@ -72,9 +79,9 @@ wrap the password in them, and commas, because the sign-in command in
 [Prove the guards](#prove-the-guards) splits on them.
 
 ```shell
-./scripts/create-user.sh '<UserPoolId>' alice '<password>' general random engineering
-./scripts/create-user.sh '<UserPoolId>' bob '<password>' general random engineering
-./scripts/create-user.sh '<UserPoolId>' carol '<password>' general random
+./scripts/create-user.sh alice '<password>' general random engineering
+./scripts/create-user.sh bob '<password>' general random engineering
+./scripts/create-user.sh carol '<password>' general random
 ```
 
 carol isn't a member of #engineering, so she's the one to test the membership checks with.
@@ -103,7 +110,7 @@ browser is needed:
 
 ```shell
 TOKEN=$(aws cognito-idp admin-initiate-auth \
-  --user-pool-id '<UserPoolId>' --client-id '<UserPoolClientId>' \
+  --user-pool-id "$USER_POOL_ID" --client-id "$CLIENT_ID" \
   --auth-flow ADMIN_USER_PASSWORD_AUTH \
   --auth-parameters 'USERNAME=carol,PASSWORD=<password>' \
   --query AuthenticationResult.IdToken --output text)
@@ -113,17 +120,17 @@ TOKEN=$(aws cognito-idp admin-initiate-auth \
 
 ```shell
 # carol's channels: #general and #random with their members, no #engineering
-curl -s -H "Authorization: $TOKEN" "<RestApiUrl>channels"
+curl -s -H "Authorization: $TOKEN" "${REST_API}channels"
 
 # #engineering history: {"message":"Forbidden"} 403, from the Lambda's membership check
-curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "<RestApiUrl>channels/engineering/messages"
+curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "${REST_API}channels/engineering/messages"
 ```
 
 ### Events HTTP endpoint
 
 ```shell
 # publish to #engineering: 401 "Not authorized to access channel", from onPublish
-curl -s -w ' %{http_code}\n' "https://<EventApiHttpDns>/event" \
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
   -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/engineering","events":["{\"message\":\"hi\"}"]}'
 
@@ -136,8 +143,8 @@ The token goes in twice: base64url-encoded in a subprotocol header to connect, a
 one message with `-x` and waits 3 seconds for the reply with `-w 3`.
 
 ```shell
-WS="wss://<EventApiRealtimeDns>/event/realtime"
-AUTH=$(printf '{"host":"%s","Authorization":"%s"}' "<EventApiHttpDns>" "$TOKEN")
+WS="wss://$EVENTS_REALTIME/event/realtime"
+AUTH=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TOKEN")
 HEADER=$(printf '%s' "$AUTH" | base64 | tr '+/' '-_' | tr -d '\n=')
 
 # subscribe to #engineering: subscribe_error, from onSubscribe
@@ -161,17 +168,17 @@ To try the wildcards, replace `/serverlesschat/channels/engineering` in `SUBSCRI
 TAMPERED="${TOKEN%?????}AAAAA"   # breaks the signature
 
 # REST API: no token 401, tampered token {"message":"Access Denied"} 403, from the Cognito authorizer
-curl -s -w ' %{http_code}\n' "<RestApiUrl>channels/general/messages"
-curl -s -w ' %{http_code}\n' -H "Authorization: $TAMPERED" "<RestApiUrl>channels/general/messages"
+curl -s -w ' %{http_code}\n' "${REST_API}channels/general/messages"
+curl -s -w ' %{http_code}\n' -H "Authorization: $TAMPERED" "${REST_API}channels/general/messages"
 
 # Events HTTP endpoint: 401 for both
-curl -s -w ' %{http_code}\n' "https://<EventApiHttpDns>/event" -H 'Content-Type: application/json' \
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi\"}"]}'
-curl -s -w ' %{http_code}\n' "https://<EventApiHttpDns>/event" -H "Authorization: $TAMPERED" -H 'Content-Type: application/json' \
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" -H "Authorization: $TAMPERED" -H 'Content-Type: application/json' \
   -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi\"}"]}'
 
 # WebSocket connect: connection_error, 401
-BAD=$(printf '{"host":"%s","Authorization":"%s"}' "<EventApiHttpDns>" "$TAMPERED" \
+BAD=$(printf '{"host":"%s","Authorization":"%s"}' "$EVENTS_HTTP" "$TAMPERED" \
   | base64 | tr '+/' '-_' | tr -d '\n=')
 npx wscat -s aws-appsync-event-ws -s "header-$BAD" -c "$WS" -w 3 -x '{"type":"connection_init"}'
 ```
