@@ -22,11 +22,34 @@ is gone, and so is the trust in whatever the client sends.
 
 ## Prerequisites
 
-- Node.js 22 or later
-- AWS CLI configured for the account and region to deploy to
-- A CDK bootstrapped account (`npx cdk bootstrap`)
-- Python 3, to serve the client locally
-- `jq` and `curl`, for proving the guards
+Install these yourself:
+
+| Tool | Version | Used for |
+| --- | --- | --- |
+| Node.js and npm | 22 or later | CDK and the Lambda code. The Lambdas run on Node.js 22. |
+| AWS CLI | v2 | Deploy credentials, `scripts/create-user.sh`, proving the guards |
+| Python | 3.x | Serving the client with `python3 -m http.server` |
+| jq | 1.6 or later | `scripts/create-user.sh`, proving the guards |
+| curl | any | Proving the guards |
+| A POSIX shell | sh, bash or zsh | The scripts and commands. On Windows, use WSL. |
+
+You also need:
+
+- AWS credentials allowed to deploy CDK stacks and call the Cognito admin APIs, set up for
+  the account and region to deploy to.
+- The account and region bootstrapped for CDK, once: `npx cdk bootstrap`.
+
+`npm install` installs the rest, pinned in `package.json`:
+
+- `aws-cdk-lib` 2.245.0
+- the CDK CLI (`aws-cdk`) 2.1114.1, run through `npx cdk` or the npm scripts
+- TypeScript 5.6
+
+There's no need to install the CDK CLI globally. `npx wscat` downloads wscat 6 the first
+time you prove the guards over the WebSocket.
+
+Tested with Node.js 24, AWS CLI 2.32, Python 3.13, jq 1.7 and curl 8.7, on macOS in
+eu-central-1.
 
 ## Deploy
 
