@@ -1,5 +1,5 @@
 // Creates the Cognito users and their channel memberships. Safe to run again.
-// Usage: SEED_PASSWORD='...' npm run seed
+// Usage: USER_POOL_ID='...' SEED_PASSWORD='...' npm run seed
 import {
     AdminCreateUserCommand,
     AdminGetUserCommand,
@@ -9,27 +9,29 @@ import {
 } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { stackOutputs } from './outputs.mjs';
+
+// the table name is set in the stack
+const MEMBERSHIPS_TABLE = 'serverless-chat-cognito-memberships';
 
 const USERS = [
     { username: 'alice', name: 'Alice Anderson' },
     { username: 'bob', name: 'Bob Baker' },
     { username: 'carol', name: 'Carol Chen' },
 ];
-// carol isn't a member of #leads, the guard script uses her to test the checks
+// carol isn't a member of #leads, so she can test the membership checks
 const CHANNELS = {
     general: ['alice', 'bob', 'carol'],
     random: ['alice', 'bob', 'carol'],
     leads: ['alice', 'bob'],
 };
 
-const password = process.env.SEED_PASSWORD;
-if (!password) {
-    console.error('Set SEED_PASSWORD (at least 8 characters with upper and lower case, a number and a symbol).');
+const { USER_POOL_ID: UserPoolId, SEED_PASSWORD: password } = process.env;
+if (!UserPoolId || !password) {
+    console.error('Set USER_POOL_ID (the UserPoolId output) and SEED_PASSWORD (at least 8 characters'
+        + ' with upper and lower case letters, a number and a symbol).');
     process.exit(1);
 }
 
-const { UserPoolId, MembershipsTableName } = stackOutputs();
 const cognito = new CognitoIdentityProviderClient({});
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
@@ -71,7 +73,7 @@ for (const [channel, usernames] of Object.entries(CHANNELS)) {
     for (const username of usernames) {
         const { sub, name } = users[username];
         await ddb.send(new PutCommand({
-            TableName: MembershipsTableName,
+            TableName: MEMBERSHIPS_TABLE,
             Item: { channel, userId: sub, username, name },
         }));
     }

@@ -6,9 +6,8 @@
     "chat-appsync-events-cognito": "bin/app.ts"
   },
   "scripts": {
-    "deploy": "cdk deploy --outputs-file cdk-outputs.json && node scripts/write-config.mjs",
+    "deploy": "cdk deploy",
     "seed": "node scripts/seed.mjs",
-    "guard": "node scripts/guard.mjs",
     "client": "python3 -m http.server 5173 --directory client",
     "destroy": "cdk destroy",
     "cdk": "cdk"

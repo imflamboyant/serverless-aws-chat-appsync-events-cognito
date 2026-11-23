@@ -23,7 +23,7 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
    - The author comes from the token
    - Message history and the channel list
 5. **Proving the guards**
-   - The guard script and its results
+   - Calling each entry point as carol
    - What happens when the token expires
    - What's left out
 
@@ -43,7 +43,8 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
 
 ## Guard results
 
-From `npm run guard`, signed in as carol, who isn't a member of #leads.
+From the commands in the README's "Prove the guards", signed in as carol, who isn't a
+member of #leads.
 
 | As carol                                              | Rejected by        | Result                  |
 | ----------------------------------------------------- | ------------------ | ----------------------- |
@@ -59,7 +60,7 @@ From `npm run guard`, signed in as carol, who isn't a member of #leads.
 | REST API, tampered token                              | Cognito authorizer | 403 `Access Denied`     |
 | Events HTTP endpoint, no token                        | Event API auth     | 401                     |
 | Events HTTP endpoint, tampered token                  | Event API auth     | 401                     |
-| WebSocket connect, tampered token                     | Event API auth     | connection refused      |
+| WebSocket connect, tampered token                     | Event API auth     | `connection_error` 401  |
 
 Controls: carol gets 200 for #general history and `subscribe_success` for #general.
 

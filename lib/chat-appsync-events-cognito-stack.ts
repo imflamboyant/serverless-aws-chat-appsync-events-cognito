@@ -51,7 +51,7 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             generateSecret: false,
             // the Cognito default, set explicitly: removing the property later doesn't reset it
             idTokenValidity: cdk.Duration.hours(1),
-            // ADMIN_USER_PASSWORD_AUTH lets the guard script sign in with your AWS credentials
+            // ADMIN_USER_PASSWORD_AUTH lets the AWS CLI sign in with your AWS credentials (README)
             authFlows: {adminUserPassword: true},
             oAuth: {
                 flows: {authorizationCodeGrant: true},
@@ -170,7 +170,7 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             subscribeHandlerConfig: {dataSource: membershipsDataSource},
         });
 
-        // outputs, written to cdk-outputs.json and read by the scripts in ./scripts
+        // outputs, for client/config.js, the seed script and the commands in the README
         new CfnOutput(this, 'UserPoolId', {value: userPool.userPoolId});
         new CfnOutput(this, 'UserPoolClientId', {value: userPoolClient.userPoolClientId});
         new CfnOutput(this, 'CognitoDomainUrl', {value: domain.baseUrl()});

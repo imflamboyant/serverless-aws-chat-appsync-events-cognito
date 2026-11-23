@@ -26,6 +26,7 @@ is gone, and so is the trust in whatever the client sends.
 - AWS CLI configured for the account and region to deploy to
 - A CDK bootstrapped account (`npx cdk bootstrap`)
 - Python 3, to serve the client locally
+- `jq` and `curl`, for proving the guards
 
 ## Deploy
 
@@ -34,14 +35,22 @@ npm install
 npm run deploy
 ```
 
-`npm run deploy` writes the stack outputs to `cdk-outputs.json` and generates
-`client/config.js` from them.
+The deploy prints the stack outputs. Export them for the next steps:
+
+```shell
+export USER_POOL_ID=<UserPoolId>
+export CLIENT_ID=<UserPoolClientId>
+export REST_API=<RestApiUrl>              # ends with a slash
+export EVENTS_HTTP=<EventApiHttpDns>
+export EVENTS_REALTIME=<EventApiRealtimeDns>
+```
 
 ## Seed users and channels
 
 CDK can't set Cognito passwords, so a script creates the users after the deploy. All three
 users get the password from `SEED_PASSWORD`. It needs at least 8 characters with upper and
-lower case letters, a number and a symbol.
+lower case letters, a number and a symbol. Leave out commas: the sign-in command in
+[Prove the guards](#prove-the-guards) splits on them.
 
 ```shell
 SEED_PASSWORD='...' npm run seed
@@ -55,6 +64,9 @@ SEED_PASSWORD='...' npm run seed
 
 ## Run the client
 
+Copy `client/config.example.js` to `client/config.js` and fill in the values from the
+deploy outputs. Then serve the client:
+
 ```shell
 npm run client
 ```
@@ -65,14 +77,94 @@ won't work.
 
 ## Prove the guards
 
-The UI never offers #leads to carol, so the browser only proves the UI. The guard script
-signs in as carol and calls each entry point directly:
+The UI never offers #leads to carol, so the browser only shows that the UI hides it. The
+commands below sign in as carol and call each entry point directly. The comments show what
+each one returns.
+
+Get carol's ID token. `ADMIN_USER_PASSWORD_AUTH` signs in with your AWS credentials, so no
+browser is needed:
 
 ```shell
-SEED_PASSWORD='...' npm run guard
+TOKEN=$(aws cognito-idp admin-initiate-auth \
+  --user-pool-id "$USER_POOL_ID" --client-id "$CLIENT_ID" \
+  --auth-flow ADMIN_USER_PASSWORD_AUTH \
+  --auth-parameters "USERNAME=carol,PASSWORD=$SEED_PASSWORD" \
+  --query AuthenticationResult.IdToken --output text)
 ```
 
-It posts two "guard test" messages to #general.
+### REST API
+
+```shell
+# carol's channels: general and random, no leads
+curl -s -H "Authorization: $TOKEN" "${REST_API}channels" | jq -r '.[].id'
+
+# #leads history: {"message":"Forbidden"} 403, from the Lambda's membership check
+curl -s -w ' %{http_code}\n' -H "Authorization: $TOKEN" "${REST_API}channels/leads/messages"
+```
+
+### Events HTTP endpoint
+
+```shell
+# publish to #leads: 401 "Not authorized to access channel", from onPublish
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
+  -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"channel":"/serverlesschat/channels/leads","events":["{\"message\":\"hi\"}"]}'
+
+# publish to #general claiming to be alice: 200, but the stored author is carol
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" \
+  -H "Authorization: $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi, I am alice\",\"username\":\"alice\"}"]}'
+curl -s -H "Authorization: $TOKEN" "${REST_API}channels/general/messages" | jq -r '.[-1] | "\(.username): \(.message)"'
+```
+
+### WebSocket
+
+The token goes in twice: base64url-encoded in a subprotocol header to connect, and in the
+`authorization` field of each message. [wscat](https://github.com/websockets/wscat) sends
+one message with `-x` and waits 3 seconds for the reply with `-w 3`.
+
+```shell
+WS="wss://$EVENTS_REALTIME/event/realtime"
+AUTH=$(jq -nc --arg host "$EVENTS_HTTP" --arg token "$TOKEN" '{host: $host, Authorization: $token}')
+HEADER=$(printf '%s' "$AUTH" | base64 | tr '+/' '-_' | tr -d '\n=')
+
+# subscribe to #leads: subscribe_error, from onSubscribe
+SUBSCRIBE=$(jq -nc --argjson auth "$AUTH" \
+  '{type: "subscribe", id: "1", channel: "/serverlesschat/channels/leads", authorization: $auth}')
+npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$SUBSCRIBE"
+
+# publish to #leads: publish_error, from onPublish
+PUBLISH=$(jq -nc --argjson auth "$AUTH" \
+  '{type: "publish", id: "1", channel: "/serverlesschat/channels/leads", events: [{message: "hi"} | tojson], authorization: $auth}')
+npx wscat -s aws-appsync-event-ws -s "header-$HEADER" -c "$WS" -w 3 -x "$PUBLISH"
+```
+
+To try the wildcards, change the subscribe channel to `/serverlesschat/channels/*` or
+`/serverlesschat/*`: both get `subscribe_error`. With `/serverlesschat/channels/general`,
+carol gets `subscribe_success`.
+
+### No token or a tampered token
+
+```shell
+TAMPERED="${TOKEN%?????}AAAAA"   # breaks the signature
+
+# REST API: no token 401, tampered token {"message":"Access Denied"} 403, from the Cognito authorizer
+curl -s -w ' %{http_code}\n' "${REST_API}channels/general/messages"
+curl -s -w ' %{http_code}\n' -H "Authorization: $TAMPERED" "${REST_API}channels/general/messages"
+
+# Events HTTP endpoint: 401 for both
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" -H 'Content-Type: application/json' \
+  -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi\"}"]}'
+curl -s -w ' %{http_code}\n' "https://$EVENTS_HTTP/event" -H "Authorization: $TAMPERED" -H 'Content-Type: application/json' \
+  -d '{"channel":"/serverlesschat/channels/general","events":["{\"message\":\"hi\"}"]}'
+
+# WebSocket connect: connection_error, 401
+BAD=$(jq -nc --arg host "$EVENTS_HTTP" --arg token "$TAMPERED" '{host: $host, Authorization: $token}' \
+  | base64 | tr '+/' '-_' | tr -d '\n=')
+npx wscat -s aws-appsync-event-ws -s "header-$BAD" -c "$WS" -w 3 -x '{"type":"connection_init"}'
+```
+
+The publish to #general posts one message there.
 
 ## Cleanup
 

@@ -3,6 +3,5 @@ node_modules
 # CDK
 cdk.out
 .cdk.staging
-cdk-outputs.json
-# generated from the CDK outputs by scripts/write-config.mjs
+# your copy of client/config.example.js, with the deploy outputs
 client/config.js
