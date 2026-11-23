@@ -1,28 +1,29 @@
 // Chat client: REST API for channels and history, AppSync Events WebSocket for real time.
 // Every request carries the Cognito ID token.
+import { getIdToken, signIn, signOut } from './auth.js';
+
 (async function () {
   const cfg = window.CHAT_CONFIG;
   const CHANNEL_PREFIX = '/serverlesschat/channels/';
   const statusEl = document.getElementById('status');
 
-  await ChatAuth.handleRedirect();
-  const firstToken = await ChatAuth.getIdToken();
+  const firstToken = await getIdToken();
   if (!firstToken) {
-    ChatAuth.signIn();
+    await signIn();
     return;
   }
-  const me = ChatAuth.claims(firstToken);
+  const me = firstToken.payload;
   document.getElementById('current-user').textContent = me.name || me['cognito:username'];
-  document.getElementById('sign-out').addEventListener('click', ChatAuth.signOut);
+  document.getElementById('sign-out').addEventListener('click', () => signOut());
 
   // a valid ID token, or back to the sign-in page when the session is gone
   async function idToken() {
-    const token = await ChatAuth.getIdToken();
+    const token = await getIdToken();
     if (!token) {
-      ChatAuth.signIn();
+      await signIn();
       throw new Error('Signed out');
     }
-    return token;
+    return token.toString();
   }
 
   function showStatus(text) {

@@ -10,7 +10,7 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
    - The memberships table
 2. **Signing in with Cognito**
    - User pool and managed login
-   - Authorization code with PKCE, without a library
+   - Sign-in with Amplify Auth: authorization code and PKCE
    - Seeding users
 3. **Cognito auth on both APIs**
    - Auth options for AppSync Events
@@ -32,8 +32,10 @@ Part 5 of the serverless chat series. Previous parts used an API key for AppSync
   be reused after a user is deleted.
 - **Memberships table:** separate from messages, keyed by `channel` + `userId`, with a
   `byUser` index for listing a user's channels.
-- **Sign-in:** managed login, authorization code grant with PKCE, written by hand
-  (`client/js/auth.js`). No Amplify, because the client has no build step.
+- **Sign-in:** managed login, authorization code grant with PKCE, handled by Amplify Auth
+  loaded from esm.sh, so the client still has no build step. Amplify is used for sign-in
+  only: its Events client always sends the access token, and this project uses the ID token
+  on every call.
 - **Token:** the ID token for both APIs. The AppSync Events docs specify it for Cognito, and
   the API Gateway Cognito authorizer expects it when the method has no OAuth scopes.
 - **Channels endpoint:** `GET /channels` returns the caller's channels and their members.

@@ -50,7 +50,7 @@
   <script src="vendor/chat-ui/js/members.js"></script>
   <!-- your copy of config.example.js, filled in with the deploy outputs -->
   <script src="config.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/app.js"></script>
+  <!-- a module: it imports js/auth.js, which loads Amplify Auth from esm.sh -->
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -8,7 +8,8 @@ is gone, and so is the trust in whatever the client sends.
 ## What's in it
 
 - **Cognito user pool** with managed login. The browser client signs in with the
-  authorization code grant and PKCE, written by hand with no dependencies (`client/js/auth.js`).
+  authorization code grant and PKCE, handled by Amplify Auth (`client/js/auth.js`). The page
+  loads Amplify from [esm.sh](https://esm.sh), so there's no build step.
 - **AppSync Event API** with Cognito auth for connect, publish and subscribe. The
   `serverlesschat` namespace has two handlers (`src/appsyncjs/serverlesschat-handler.js`):
   - `onSubscribe` reads the membership item and rejects non-members and wildcard channels.
