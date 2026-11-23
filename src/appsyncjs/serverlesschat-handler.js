@@ -55,8 +55,8 @@ export const onPublish = {
                 eventId: id,
                 item: {
                     channel,
-                    // sorts by time, the event id keeps messages in one batch unique
-                    id: `${timestamp}#${id}`,
+                    // a ULID: unique, and sorts by time as a string
+                    id: util.autoUlid(),
                     timestamp,
                     userId: sub,
                     username,
