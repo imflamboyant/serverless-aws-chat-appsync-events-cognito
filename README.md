@@ -1,9 +1,7 @@
 # Serverless Chat on AWS with AppSync Events and Cognito
 
 A real-time chat on AWS AppSync Events where every user signs in with an Amazon Cognito
-user pool, and channel membership is checked at every entry point. It continues the
-[serverless chat series](https://github.com/imflamboyant/serverless-aws-chat): the API key
-is gone, and so is the trust in whatever the client sends.
+user pool, and channel membership is checked at every entry point.
 
 ## What's in it
 
