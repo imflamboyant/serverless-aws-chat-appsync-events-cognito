@@ -34,7 +34,7 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        // Cognito user pool. No self sign-up: users are created by the seed script.
+        // Cognito user pool. No self sign-up: users are created by scripts/create-user.sh.
         const userPool = new UserPool(this, 'ChatUserPool', {
             userPoolName: 'serverless-chat-cognito',
             selfSignUpEnabled: false,
@@ -170,7 +170,7 @@ export class ChatAppsyncEventsCognitoStack extends cdk.Stack {
             subscribeHandlerConfig: {dataSource: membershipsDataSource},
         });
 
-        // outputs, for client/config.js, the seed script and the commands in the README
+        // outputs, for client/config.js, scripts/create-user.sh and the commands in the README
         new CfnOutput(this, 'UserPoolId', {value: userPool.userPoolId});
         new CfnOutput(this, 'UserPoolClientId', {value: userPoolClient.userPoolClientId});
         new CfnOutput(this, 'CognitoDomainUrl', {value: domain.baseUrl()});

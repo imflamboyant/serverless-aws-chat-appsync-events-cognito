@@ -45,22 +45,24 @@ export EVENTS_HTTP=<EventApiHttpDns>
 export EVENTS_REALTIME=<EventApiRealtimeDns>
 ```
 
-## Seed users and channels
+## Create users and channels
 
-CDK can't set Cognito passwords, so a script creates the users after the deploy. All three
-users get the password from `SEED_PASSWORD`. It needs at least 8 characters with upper and
-lower case letters, a number and a symbol. Leave out commas: the sign-in command in
-[Prove the guards](#prove-the-guards) splits on them.
+CDK can't set Cognito passwords, so `scripts/create-user.sh` creates each user after the
+deploy. It runs three AWS CLI commands: create the user, set a permanent password, and write
+one membership item per channel.
+
+The password needs at least 8 characters with upper and lower case letters, a number and a
+symbol. Leave out commas: the sign-in command in [Prove the guards](#prove-the-guards)
+splits on them.
 
 ```shell
-SEED_PASSWORD='...' npm run seed
+export SEED_PASSWORD='...'
+./scripts/create-user.sh alice "$SEED_PASSWORD" general random leads
+./scripts/create-user.sh bob "$SEED_PASSWORD" general random leads
+./scripts/create-user.sh carol "$SEED_PASSWORD" general random
 ```
 
-| User  | #general | #random | #leads |
-| ----- | -------- | ------- | ------ |
-| alice | ✓        | ✓       | ✓      |
-| bob   | ✓        | ✓       | ✓      |
-| carol | ✓        | ✓       |        |
+carol isn't a member of #leads, so she's the one to test the membership checks with.
 
 ## Run the client
 
